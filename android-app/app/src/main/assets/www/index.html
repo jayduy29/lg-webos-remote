@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#09090b" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>LG webOS Remote</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Top Status Header -->
+    <header class="top-bar">
+      <button id="btnTvPill" class="tv-pill" type="button" title="Chọn hoặc quét TV">
+        <span id="statusDot" class="status-dot offline"></span>
+        <div class="tv-pill-text">
+          <span id="activeTvName" class="tv-name">Chưa kết nối TV</span>
+          <span id="activeTvSub" class="tv-sub">Chạm để quét Wi-Fi / chọn TV</span>
+        </div>
+        <svg class="icon-xs chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M6 9l6 6 6-6"/>
+        </svg>
+      </button>
+
+      <div class="top-actions">
+        <button id="btnOpenQr" class="icon-btn" type="button" title="Mở trên điện thoại (QR)">
+          <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7" rx="1"/>
+            <rect x="14" y="3" width="7" height="7" rx="1"/>
+            <rect x="3" y="14" width="7" height="7" rx="1"/>
+            <path d="M14 14h3v3h-3zM18 18h3v3h-3zM18 14h3M14 18v3"/>
+          </svg>
+        </button>
+        <button id="btnPower" class="icon-btn power-btn" type="button" title="Tắt / Bật nguồn TV">
+          <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+            <path d="M12 2v10"/>
+            <path d="M18.4 6.6a9 9 0 1 1-12.77.04"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Scrollable Viewport -->
+    <main class="main-content">
+
+      <!-- TAB 1: REMOTE -->
+      <section id="tab-remote" class="tab-panel active">
+        <!-- Quick utility row -->
+        <div class="quick-row">
+          <button class="pill-btn" data-tab-jump="apps" type="button">
+            <svg class="icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="4" width="20" height="14" rx="2"/>
+              <path d="M8 21h8M12 18v3"/>
+            </svg>
+            <span>Nguồn vào</span>
+          </button>
+          <button class="pill-btn" id="btnOpenKeyboard" type="button">
+            <svg class="icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="5" width="20" height="14" rx="2"/>
+              <path d="M6 9h.01M10 9h.01M14 9h.01M18 9h.01M6 13h.01M10 13h.01M14 13h.01M18 13h.01M8 16h8"/>
+            </svg>
+            <span>Bàn phím</span>
+          </button>
+          <button class="pill-btn" id="btnToggleNumpad" type="button">
+            <svg class="icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="6" cy="6" r="1.5"/><circle cx="12" cy="6" r="1.5"/><circle cx="18" cy="6" r="1.5"/>
+              <circle cx="6" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="18" cy="12" r="1.5"/>
+              <circle cx="12" cy="18" r="1.5"/>
+            </svg>
+            <span>Phím số</span>
+          </button>
+          <button class="pill-btn" data-btn="MENU" type="button">
+            <svg class="icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.6.85 1 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+            <span>Cài đặt</span>
+          </button>
+        </div>
+
+        <!-- Live Volume Slider Card -->
+        <div class="volume-card">
+          <button id="btnMute" class="vol-mute-btn" type="button" title="Tắt tiếng">
+            <svg id="muteIcon" class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+            </svg>
+          </button>
+          <input id="volumeSlider" type="range" min="0" max="100" value="20" aria-label="Âm lượng" />
+          <span id="volumeValue" class="vol-badge">20</span>
+        </div>
+
+        <!-- Volume / D-Pad / Channel Main Cluster -->
+        <div class="remote-core">
+          <!-- Left: Volume Rocker -->
+          <div class="rocker">
+            <button class="rocker-btn" data-action="volume_up" type="button" aria-label="Tăng âm lượng">+</button>
+            <span class="rocker-label">VOL</span>
+            <button class="rocker-btn" data-action="volume_down" type="button" aria-label="Giảm âm lượng">−</button>
+          </div>
+
+          <!-- Center: Circular Tactile D-Pad -->
+          <div class="dpad-wrap">
+            <div class="dpad">
+              <button class="dpad-dir dpad-up" data-btn="UP" type="button" aria-label="Lên">
+                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M18 15l-6-6-6 6"/></svg>
+              </button>
+              <button class="dpad-dir dpad-down" data-btn="DOWN" type="button" aria-label="Xuống">
+                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M6 9l6 6 6-6"/></svg>
+              </button>
+              <button class="dpad-dir dpad-left" data-btn="LEFT" type="button" aria-label="Trái">
+                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M15 18l-6-6 6-6"/></svg>
+              </button>
+              <button class="dpad-dir dpad-right" data-btn="RIGHT" type="button" aria-label="Phải">
+                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M9 18l6-6-6-6"/></svg>
+              </button>
+              <button class="dpad-ok" data-btn="ENTER" type="button">OK</button>
+            </div>
+          </div>
+
+          <!-- Right: Channel Rocker -->
+          <div class="rocker">
+            <button class="rocker-btn" data-action="channel_up" type="button" aria-label="Kênh tiếp">▲</button>
+            <span class="rocker-label">CH</span>
+            <button class="rocker-btn" data-action="channel_down" type="button" aria-label="Kênh trước">▼</button>
+          </div>
+        </div>
+
+        <!-- Navigation Row: Back / Home / Exit -->
+        <div class="nav-row">
+          <button class="key-btn" data-btn="BACK" type="button">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            <span>Quay lại</span>
+          </button>
+          <button class="key-btn key-home" data-btn="HOME" type="button">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>
+            <span>Home</span>
+          </button>
+          <button class="key-btn" data-btn="EXIT" type="button">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            <span>Thoát</span>
+          </button>
+        </div>
+
+        <!-- Media Controls -->
+        <div class="media-bar">
+          <button class="media-btn" data-action="media_rewind" type="button" title="Tua lùi">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="currentColor"><path d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z"/></svg>
+          </button>
+          <button class="media-btn media-primary" data-action="media_play" type="button" title="Phát">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          </button>
+          <button class="media-btn" data-action="media_pause" type="button" title="Tạm dừng">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+          </button>
+          <button class="media-btn" data-action="media_stop" type="button" title="Dừng">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h12v12H6z"/></svg>
+          </button>
+          <button class="media-btn" data-action="media_ff" type="button" title="Tua tới">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="currentColor"><path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z"/></svg>
+          </button>
+        </div>
+
+        <!-- Collapsible Numpad -->
+        <div id="numpadDrawer" class="numpad-drawer hidden">
+          <div class="numpad-grid">
+            <button class="num-btn" data-btn="1" type="button">1</button>
+            <button class="num-btn" data-btn="2" type="button">2</button>
+            <button class="num-btn" data-btn="3" type="button">3</button>
+            <button class="num-btn" data-btn="4" type="button">4</button>
+            <button class="num-btn" data-btn="5" type="button">5</button>
+            <button class="num-btn" data-btn="6" type="button">6</button>
+            <button class="num-btn" data-btn="7" type="button">7</button>
+            <button class="num-btn" data-btn="8" type="button">8</button>
+            <button class="num-btn" data-btn="9" type="button">9</button>
+            <button class="num-btn num-sub" data-btn="INFO" type="button">INFO</button>
+            <button class="num-btn" data-btn="0" type="button">0</button>
+            <button class="num-btn num-sub" data-btn="GUIDE" type="button">GUIDE</button>
+          </div>
+          <div class="color-keys">
+            <button class="color-dot red" data-btn="RED" type="button" aria-label="Đỏ"></button>
+            <button class="color-dot green" data-btn="GREEN" type="button" aria-label="Xanh lá"></button>
+            <button class="color-dot yellow" data-btn="YELLOW" type="button" aria-label="Vàng"></button>
+            <button class="color-dot blue" data-btn="BLUE" type="button" aria-label="Xanh dương"></button>
+          </div>
+        </div>
+
+        <!-- Quick Streaming Shortcuts -->
+        <div class="shortcut-row">
+          <button class="shortcut-chip yt" data-launch="youtube.leanback.v4" type="button">YouTube</button>
+          <button class="shortcut-chip nf" data-launch="netflix" type="button">Netflix</button>
+          <button class="shortcut-chip fpt" data-launch="com.fptplay.app" type="button">FPT Play</button>
+          <button class="shortcut-chip sp" data-launch="spotify-beehive" type="button">Spotify</button>
+        </div>
+      </section>
+
+      <!-- TAB 2: MAGIC TOUCHPAD (AIR MOUSE) -->
+      <section id="tab-touchpad" class="tab-panel">
+        <div class="touchpad-header">
+          <div>
+            <h2>Magic Touchpad</h2>
+            <p class="muted">Vuốt 1 ngón để di chuột · Chạm để Click · Vuốt thanh phải để cuộn</p>
+          </div>
+          <label class="sens-control">
+            <span>Độ nhạy</span>
+            <input id="sensitivitySlider" type="range" min="0.8" max="3.2" step="0.2" value="1.8" />
+          </label>
+        </div>
+
+        <div class="touchpad-stage">
+          <div id="touchpadArea" class="touchpad-surface">
+            <div class="touchpad-grid-bg"></div>
+            <div id="touchRipple" class="touch-cursor"></div>
+            <div class="touchpad-hint">
+              <svg class="icon-md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                <path d="M5 3l14 9-6 1.5L10 20 5 3z"/>
+              </svg>
+              <span>Di ngón tay tại đây</span>
+            </div>
+          </div>
+
+          <div id="scrollRail" class="scroll-rail" title="Vuốt để cuộn trang">
+            <span>▲</span>
+            <span class="scroll-rail-label">CUỘN</span>
+            <span>▼</span>
+          </div>
+        </div>
+
+        <div class="touchpad-footer">
+          <button class="key-btn" data-btn="BACK" type="button">Quay lại</button>
+          <button class="key-btn key-home" id="btnTouchClick" type="button">Click / OK</button>
+          <button class="key-btn" data-btn="HOME" type="button">Home</button>
+        </div>
+      </section>
+
+      <!-- TAB 3: APPS & INPUTS -->
+      <section id="tab-apps" class="tab-panel">
+        <div class="section-head">
+          <h2>Cổng vào (HDMI / Input)</h2>
+          <button id="btnRefreshApps" class="text-btn" type="button">Làm mới</button>
+        </div>
+        <div id="inputsList" class="inputs-strip">
+          <div class="empty-chip">Kết nối TV để tải danh sách cổng HDMI</div>
+        </div>
+
+        <div class="section-head mt-16">
+          <h2>Ứng dụng trên TV</h2>
+        </div>
+        <div class="search-box">
+          <svg class="icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+          </svg>
+          <input id="appSearchInput" type="search" placeholder="Tìm YouTube, Netflix, FPT Play..." />
+        </div>
+        <div id="appsGrid" class="apps-grid">
+          <div class="empty-state">Kết nối TV (hoặc bật Chế độ Demo) để xem ứng dụng trên TV</div>
+        </div>
+
+        <!-- Extra utilities: Open URL & Send Toast -->
+        <div class="card mt-16">
+          <h3 class="card-title">Gửi nhanh lên màn hình TV</h3>
+          <div class="inline-form">
+            <input id="toastMsgInput" type="text" placeholder="Nhập thông báo hiển thị trên TV..." />
+            <button id="btnSendToast" class="btn-secondary" type="button">Gửi</button>
+          </div>
+          <div class="inline-form mt-8">
+            <input id="openUrlInput" type="url" placeholder="https://... mở trình duyệt TV" />
+            <button id="btnOpenUrl" class="btn-secondary" type="button">Mở</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 4: TVs & WI-FI DISCOVERY -->
+      <section id="tab-tvs" class="tab-panel">
+        <!-- Wi-Fi Radar Scan Card -->
+        <div class="card scan-card">
+          <div class="scan-top">
+            <div>
+              <h2>Quét TV LG trong mạng Wi-Fi</h2>
+              <p class="muted" id="wifiNetworkLabel">Quét tự động qua SSDP & dải mạng LAN</p>
+            </div>
+            <button id="btnScanWifi" class="btn-primary" type="button">
+              <span class="scan-spinner hidden" id="scanSpinner"></span>
+              <span id="scanBtnText">Quét ngay</span>
+            </button>
+          </div>
+          <div id="discoveredList" class="tv-list mt-12">
+            <div class="empty-state">Bấm "Quét ngay" để tìm TV LG webOS cùng mạng Wi-Fi</div>
+          </div>
+        </div>
+
+        <!-- Recent / Saved TVs -->
+        <div class="card mt-12">
+          <div class="section-head">
+            <h2>TV gần đây</h2>
+            <button id="btnCheckRecent" class="text-btn" type="button">Kiểm tra online</button>
+          </div>
+          <div id="recentTvList" class="tv-list mt-8">
+            <div class="empty-state">Chưa có TV nào từng kết nối</div>
+          </div>
+        </div>
+
+        <!-- Manual IP & Demo Mode -->
+        <div class="card mt-12">
+          <h3 class="card-title">Kết nối bằng IP thủ công</h3>
+          <div class="inline-form">
+            <input id="manualIpInput" type="text" inputmode="decimal" placeholder="VD: 192.168.1.50" />
+            <button id="btnConnectManual" class="btn-secondary" type="button">Kết nối</button>
+          </div>
+          <div class="demo-row mt-12">
+            <div>
+              <strong>Chế độ Demo (TV LG ảo)</strong>
+              <p class="muted">Dùng thử ngay giao diện & nút bấm không cần TV thật</p>
+            </div>
+            <button id="btnDemoMode" class="btn-outline" type="button">Bật Demo</button>
+          </div>
+        </div>
+
+        <!-- Mobile Access Info Card -->
+        <div class="card mt-12">
+          <div class="section-head">
+            <h3 class="card-title">Mở trên điện thoại cùng Wi-Fi</h3>
+            <button id="btnShowQrFromTab" class="text-btn" type="button">Hiện mã QR</button>
+          </div>
+          <p class="muted">Mở Chrome/Safari trên điện thoại và truy cập địa chỉ bên dưới (có thể bấm "Thêm vào màn hình chính" để dùng như app Android):</p>
+          <div id="mobileUrlBox" class="url-box mt-8">Đang lấy địa chỉ Wi-Fi...</div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Bottom Tab Navigation -->
+    <nav class="bottom-nav">
+      <button class="nav-item active" data-tab="remote" type="button">
+        <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="6" y="2" width="12" height="20" rx="3"/>
+          <circle cx="12" cy="8" r="2"/>
+          <path d="M10 14h4M10 18h4"/>
+        </svg>
+        <span>Remote</span>
+      </button>
+      <button class="nav-item" data-tab="touchpad" type="button">
+        <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="4" width="18" height="16" rx="2"/>
+          <path d="M15 4v16"/>
+        </svg>
+        <span>Chuột bay</span>
+      </button>
+      <button class="nav-item" data-tab="apps" type="button">
+        <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="7" rx="1.5"/>
+          <rect x="14" y="3" width="7" height="7" rx="1.5"/>
+          <rect x="3" y="14" width="7" height="7" rx="1.5"/>
+          <rect x="14" y="14" width="7" height="7" rx="1.5"/>
+        </svg>
+        <span>Ứng dụng</span>
+      </button>
+      <button class="nav-item" data-tab="tvs" type="button">
+        <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M5 12.55a11 11 0 0 1 14.08 0"/>
+          <path d="M1.42 9a16 16 0 0 1 21.16 0"/>
+          <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+          <circle cx="12" cy="20" r="1"/>
+        </svg>
+        <span>Quét TV</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- Keyboard Input Bottom Sheet -->
+  <div id="keyboardModal" class="modal-backdrop hidden">
+    <div class="modal-sheet">
+      <div class="modal-head">
+        <h3>Nhập chữ lên TV</h3>
+        <button class="icon-btn" id="btnCloseKeyboard" type="button">✕</button>
+      </div>
+      <p class="muted">Gõ nội dung tìm kiếm trên YouTube, Netflix, Trình duyệt...</p>
+      <input id="tvTextInput" class="big-input mt-12" type="text" placeholder="Nhập từ khóa..." autocomplete="off" />
+      <div class="modal-actions mt-12">
+        <button id="btnTvBackspace" class="btn-secondary" type="button">⌫ Xóa</button>
+        <button id="btnTvSendText" class="btn-primary" type="button">Gửi chữ</button>
+        <button id="btnTvSendEnter" class="btn-secondary" type="button">↵ Enter</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pairing Prompt Modal -->
+  <div id="pairingModal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="pairing-pulse">📺</div>
+      <h3>Xác nhận trên TV LG</h3>
+      <p id="pairingText" class="muted mt-8">Hãy dùng remote TV bấm "Chấp nhận" (Accept) để ghép đôi lần đầu.</p>
+      <button id="btnCancelPairing" class="btn-outline mt-16" type="button">Đóng</button>
+    </div>
+  </div>
+
+  <!-- QR Code Modal -->
+  <div id="qrModal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <h3>Mở trên điện thoại</h3>
+      <p class="muted mt-8">Quét mã QR bằng điện thoại (cùng Wi-Fi với máy tính này)</p>
+      <div class="qr-wrap mt-12">
+        <img id="qrImage" alt="QR Code" />
+      </div>
+      <div id="qrUrlText" class="url-box mt-12"></div>
+      <button id="btnCloseQr" class="btn-primary mt-16 full-width" type="button">Đã hiểu</button>
+    </div>
+  </div>
+
+  <!-- Floating Toast Feedback -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

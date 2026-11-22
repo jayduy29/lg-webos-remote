@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.LGRemote" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="android:windowBackground">#09090b</item>
+        <item name="android:statusBarColor">#09090b</item>
+        <item name="android:navigationBarColor">#0e0e12</item>
+    </style>
+</resources>

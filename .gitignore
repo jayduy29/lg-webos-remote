@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# Local runtime data (saved TV client keys)
+data/
+
+# Android build artifacts
+android-app/.gradle/
+android-app/.kotlin/
+android-app/build/
+android-app/app/build/
+android-app/local.properties
+*.apk
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+*.log
