@@ -301,6 +301,23 @@
               <span id="scanBtnText">Quét ngay</span>
             </button>
           </div>
+          <!-- Web Subnet Picker (visible in Standalone Web Mode) -->
+          <div id="webSubnetBox" class="web-subnet-box hidden mt-12">
+            <div class="inline-form">
+              <input id="subnetPrefixInput" type="text" inputmode="decimal" value="192.168.1" placeholder="Dải mạng (VD: 192.168.1)" />
+              <span class="subnet-suffix">.1–254</span>
+            </div>
+            <div class="subnet-chips mt-8">
+              <button class="subnet-chip" data-subnet="192.168.1" type="button">192.168.1.x</button>
+              <button class="subnet-chip" data-subnet="192.168.0" type="button">192.168.0.x</button>
+              <button class="subnet-chip" data-subnet="192.168.2" type="button">192.168.2.x</button>
+              <button class="subnet-chip" data-subnet="192.168.100" type="button">192.168.100.x</button>
+            </div>
+            <div id="webScanProgressWrap" class="scan-progress-wrap hidden mt-8">
+              <div class="scan-progress-bar"><div id="webScanProgressFill" class="scan-progress-fill"></div></div>
+              <span id="webScanProgressText" class="muted">0%</span>
+            </div>
+          </div>
           <div id="discoveredList" class="tv-list mt-12">
             <div class="empty-state">Bấm "Quét ngay" để tìm TV LG webOS cùng mạng Wi-Fi</div>
           </div>

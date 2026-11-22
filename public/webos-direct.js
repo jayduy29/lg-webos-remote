@@ -667,6 +667,134 @@
       browserStorage.remove(id);
     }
 
+    async detectLocalSubnet() {
+      // 1. Check saved TVs first
+      const saved = browserStorage.getAll();
+      for (const tv of saved) {
+        const m = String(tv.ip || '').match(/^(\d+\.\d+\.\d+)\.\d+$/);
+        if (m) return m[1];
+      }
+
+      // 2. Try WebRTC local IPv4 candidate (works in browsers that allow local ICE)
+      try {
+        if (typeof RTCPeerConnection !== 'undefined') {
+          const ip = await new Promise((resolve) => {
+            let done = false;
+            const pc = new RTCPeerConnection({ iceServers: [] });
+            const finish = (val) => {
+              if (done) return;
+              done = true;
+              try { pc.close(); } catch {}
+              resolve(val);
+            };
+            const timer = setTimeout(() => finish(null), 1200);
+            pc.createDataChannel('scan');
+            pc.onicecandidate = (e) => {
+              if (!e || !e.candidate || !e.candidate.candidate) return;
+              const match = e.candidate.candidate.match(/(192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+|172\.(?:1[6-9]|2\d|3[01])\.\d+\.\d+)/);
+              if (match) {
+                clearTimeout(timer);
+                finish(match[1]);
+              }
+            };
+            pc.createOffer().then((o) => pc.setLocalDescription(o)).catch(() => finish(null));
+          });
+          if (ip) {
+            const m = ip.match(/^(\d+\.\d+\.\d+)\.\d+$/);
+            if (m) return m[1];
+          }
+        }
+      } catch {}
+
+      return '192.168.1';
+    }
+
+    _probeWs(url, timeoutMs) {
+      return new Promise((resolve) => {
+        const start = performance.now();
+        let settled = false;
+        let ws;
+        try {
+          ws = new WebSocket(url);
+        } catch {
+          return resolve({ status: 'blocked', elapsed: 0 });
+        }
+        const finish = (status) => {
+          if (settled) return;
+          settled = true;
+          clearTimeout(timer);
+          try { ws.close(); } catch {}
+          resolve({ status, elapsed: Math.round(performance.now() - start) });
+        };
+        const timer = setTimeout(() => finish('timeout'), timeoutMs);
+        ws.onopen = () => finish('open');
+        ws.onerror = () => finish('error');
+      });
+    }
+
+    async _probeHost(ip) {
+      const isHttps = location.protocol === 'https:';
+      const url = isHttps ? `wss://${ip}:3001` : `ws://${ip}:3000`;
+      const r1 = await this._probeWs(url, 900);
+
+      if (r1.status === 'open') {
+        return {
+          ip,
+          port: isHttps ? 3001 : 3000,
+          name: `LG webOS TV (${ip})`,
+          model: 'LG webOS · Sẵn sàng kết nối',
+          trusted: true
+        };
+      }
+
+      if (r1.status !== 'error') return null;
+
+      // Secondary control probe on closed port 3099 to separate LG TV (open TLS 3001) from closed-port hosts
+      const r2 = await this._probeWs(isHttps ? `wss://${ip}:3099` : `ws://${ip}:3099`, 550);
+      const isLikelyLG =
+        r2.status === 'timeout' ||
+        (r2.status === 'error' && r1.elapsed >= 25 && r1.elapsed > r2.elapsed * 1.8);
+
+      if (!isLikelyLG) return null;
+
+      return {
+        ip,
+        port: isHttps ? 3001 : 3000,
+        name: `LG webOS TV (${ip})`,
+        model: isHttps ? 'Cổng 3001 mở · Cần tin cậy SSL' : 'Cổng 3000 mở',
+        trusted: !isHttps
+      };
+    }
+
+    async scanSubnet(subnetPrefix, onProgress) {
+      const clean = String(subnetPrefix || '192.168.1').trim().replace(/\.$/, '');
+      if (!/^\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(clean)) {
+        throw new Error('Dải mạng không hợp lệ (VD: 192.168.1)');
+      }
+
+      const found = [];
+      const total = 254;
+      const batchSize = 24;
+      let scanned = 0;
+
+      for (let start = 1; start <= total; start += batchSize) {
+        const batch = [];
+        for (let i = start; i < start + batchSize && i <= total; i++) {
+          batch.push(this._probeHost(`${clean}.${i}`));
+        }
+        const results = await Promise.all(batch);
+        for (const tv of results) {
+          if (tv) found.push(tv);
+        }
+        scanned = Math.min(total, start + batchSize - 1);
+        if (onProgress) onProgress({ scanned, total, found: [...found] });
+      }
+
+      // Sort trusted TVs first
+      found.sort((a, b) => Number(b.trusted) - Number(a.trusted));
+      return found;
+    }
+
     async executeCommand(action, payload = {}) {
       if (!this.activeTV || !this.tvState.connected) {
         throw new Error('Chưa kết nối với TV LG. Hãy chọn TV hoặc bật Chế độ Demo.');

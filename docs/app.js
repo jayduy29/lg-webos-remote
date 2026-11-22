@@ -656,6 +656,7 @@
     list.innerHTML = '';
     for (const tv of discoveredTVs) {
       const isCurrent = state.connected && state.tv && state.tv.ip === tv.ip;
+      const needsTrust = isStandalone && location.protocol === 'https:' && tv.trusted === false;
       const el = document.createElement('div');
       el.className = `tv-item ${isCurrent ? 'is-active' : ''}`;
       el.innerHTML = `
@@ -664,15 +665,24 @@
             <div class="tv-item-name">${escapeHtml(tv.name)}</div>
             <div class="tv-item-meta">${escapeHtml(tv.ip)} · ${escapeHtml(tv.model || 'LG webOS')} ${tv.mac ? `· ${escapeHtml(tv.mac)}` : ''}</div>
           </div>
-          <span class="badge wifi">Wi-Fi</span>
+          <span class="badge ${tv.trusted ? 'online' : 'wifi'}">${tv.trusted ? 'Sẵn sàng' : 'Wi-Fi'}</span>
         </div>
         <div class="tv-item-actions">
-          <button class="btn-primary btn-sm" type="button">
+          ${needsTrust ? `<button class="btn-secondary btn-sm" data-trust-ip="${escapeHtml(tv.ip)}" type="button">🔒 Tin cậy</button>` : ''}
+          <button class="btn-primary btn-sm" data-disc-connect="1" type="button">
             ${isCurrent ? 'Đang kết nối' : 'Kết nối ngay'}
           </button>
         </div>
       `;
-      el.querySelector('button').onclick = () => connectTV(tv);
+      const trustBtn = el.querySelector('[data-trust-ip]');
+      if (trustBtn) {
+        trustBtn.onclick = () => {
+          haptic();
+          window.open(`https://${tv.ip}:3001`, '_blank', 'noopener');
+          showToast('Bấm "Nâng cao → Tiếp tục" ở tab vừa mở, sau đó quay lại bấm Kết nối ngay!', 'info');
+        };
+      }
+      el.querySelector('[data-disc-connect]').onclick = () => connectTV(tv);
       list.appendChild(el);
     }
   }
@@ -685,6 +695,47 @@
     btn.disabled = true;
     spinner.classList.remove('hidden');
     text.textContent = 'Đang quét...';
+
+    if (isStandalone && directBackend) {
+      const subnet = ($('subnetPrefixInput')?.value || '192.168.1').trim();
+      const progWrap = $('webScanProgressWrap');
+      const progFill = $('webScanProgressFill');
+      const progText = $('webScanProgressText');
+      progWrap?.classList.remove('hidden');
+      if (progFill) progFill.style.width = '2%';
+      if (progText) progText.textContent = `0% (${subnet}.1–254)`;
+      $('discoveredList').innerHTML =
+        `<div class="empty-state">Đang quét dải Wi-Fi ${escapeHtml(subnet)}.1 → .254 (cổng LG 3001)...</div>`;
+
+      try {
+        discoveredTVs = [];
+        const found = await directBackend.scanSubnet(subnet, ({ scanned, total, found: partial }) => {
+          const pct = Math.round((scanned / total) * 100);
+          if (progFill) progFill.style.width = `${pct}%`;
+          if (progText) progText.textContent = `${pct}% (${scanned}/${total})`;
+          if (partial.length > discoveredTVs.length) {
+            discoveredTVs = partial;
+            renderDiscoveredTVs();
+          }
+        });
+        discoveredTVs = found;
+        if (discoveredTVs.length === 0) {
+          $('discoveredList').innerHTML =
+            `<div class="empty-state">Không tìm thấy TV LG trên dải <strong>${escapeHtml(subnet)}.x</strong>. Hãy thử chọn dải mạng khác (VD: 192.168.0.x), đảm bảo điện thoại & TV cùng Wi-Fi, bật "LG Connect Apps" trên TV, hoặc nhập IP thủ công bên dưới.</div>`;
+        } else {
+          renderDiscoveredTVs();
+          showToast(`Tìm thấy ${discoveredTVs.length} thiết bị LG trên Wi-Fi!`, 'ok');
+        }
+      } catch (err) {
+        showToast('Lỗi quét Wi-Fi: ' + err.message, 'err');
+      } finally {
+        btn.disabled = false;
+        spinner.classList.add('hidden');
+        text.textContent = 'Quét lại';
+      }
+      return;
+    }
+
     $('discoveredList').innerHTML =
       '<div class="empty-state">Đang quét SSDP & toàn bộ dải Wi-Fi (cổng 3000/3001)...</div>';
 
@@ -882,10 +933,25 @@
       $('qrUrlText').textContent = pageUrl;
       $('qrImage').src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(pageUrl)}`;
       $('webModeBanner')?.classList.remove('hidden');
-      $('wifiScanCard')?.classList.add('hidden');
+      $('webSubnetBox')?.classList.remove('hidden');
       $('btnCheckRecent')?.classList.add('hidden');
       if (location.protocol === 'https:') {
         $('trustCertRow')?.classList.remove('hidden');
+      }
+      if (directBackend) {
+        const detectedSubnet = await directBackend.detectLocalSubnet();
+        const subnetInput = $('subnetPrefixInput');
+        if (subnetInput) subnetInput.value = detectedSubnet;
+        $('wifiNetworkLabel').textContent = `Quét trực tiếp dải Wi-Fi (${detectedSubnet}.x) từ trình duyệt`;
+        document.querySelectorAll('.subnet-chip').forEach((chip) => {
+          chip.classList.toggle('active', chip.dataset.subnet === detectedSubnet);
+          chip.addEventListener('click', () => {
+            haptic(8);
+            if (subnetInput) subnetInput.value = chip.dataset.subnet;
+            $('wifiNetworkLabel').textContent = `Quét trực tiếp dải Wi-Fi (${chip.dataset.subnet}.x) từ trình duyệt`;
+            document.querySelectorAll('.subnet-chip').forEach((c) => c.classList.toggle('active', c === chip));
+          });
+        });
       }
       return false;
     }
