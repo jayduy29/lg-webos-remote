@@ -4,6 +4,8 @@
 
 ## 2 Chế độ chạy trên Web
 
+- 🌐 **Mở trực tiếp phiên bản Web (GitHub Pages):** https://jayduy29.github.io/lg-webos-remote/
+
 ### 1. Phiên bản Web trực tiếp (GitHub Pages — không cần server)
 - Tự động kích hoạt khi mở từ GitHub Pages hoặc bất kỳ hosting tĩnh nào (`public/`).
 - Kết nối **trực tiếp** từ trình duyệt tới TV LG qua `wss://<IP-TV>:3001` (SSAP WebSocket).
@@ -28,4 +30,4 @@ npm start
 - **Quét TV & Wake-on-LAN** (khi chạy Local Server hoặc Android APK): Tự động quét SSDP + dải mạng `/24`, lưu MAC và bật TV từ xa.
 
 ## Tự động xuất bản lên GitHub Pages
-Repo đã có sẵn workflow `.github/workflows/pages.yml`. Chỉ cần vào **Settings → Pages → Build and deployment → Source: GitHub Actions**, mỗi lần push lên `main` phiên bản Web sẽ tự động cập nhật.
+GitHub Pages được cấu hình tự động xuất bản từ thư mục `docs/` trên nhánh `main` tại: https://jayduy29.github.io/lg-webos-remote/
